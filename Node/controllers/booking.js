@@ -43,7 +43,7 @@ export const addBooking = async (req, res) => {
 
 export const getBookings = async (req, res) => {
     try {
-        const {fromDate, toDate, fromAmount,toAmount, page, type} = req.query;
+        const {fromDate, toDate, fromAmount,toAmount, page, type, dashboard} = req.query;
 
         const LIMIT = 6;
         const currentPage = page ? page : 1
@@ -61,9 +61,12 @@ export const getBookings = async (req, res) => {
         }
 
         if(toDate){
+            const endOfDay = new Date(toDate);
+            endOfDay.setUTCHours(23, 59, 59, 999);
+
             filters.push({
-                toDate:{
-                    lte:new Date(toDate),
+                fromDate:{
+                    lte:endOfDay,
                 }
             })
         }
@@ -98,21 +101,39 @@ export const getBookings = async (req, res) => {
             toDate:'desc'
         })
 
-        const bookings = await prisma.booking.findMany({
-            skip:skip,
-            take:LIMIT,
-            where: {
-                AND:[...filters]
-            },
-            include:{
-                User:{
-                    select:{
-                        name:true
+        let bookings = [];
+
+        if(dashboard){
+            bookings = await prisma.booking.findMany({
+                where: {
+                    AND:[...filters]
+                },
+                include:{
+                    User:{
+                        select:{
+                            name:true
+                        }
                     }
-                }
-            },
-            orderBy:orderObj
-        });
+                },
+                orderBy:orderObj
+            });
+        }else{
+            bookings = await prisma.booking.findMany({
+                skip:skip,
+                take:LIMIT,
+                where: {
+                    AND:[...filters]
+                },
+                include:{
+                    User:{
+                        select:{
+                            name:true
+                        }
+                    }
+                },
+                orderBy:orderObj
+            });
+        }
         const bookingsData = bookings.length == 0 ? [] : bookings
         return res.status(200).json({bookings:bookingsData});
     } catch (error) {

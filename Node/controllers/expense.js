@@ -35,7 +35,7 @@ export const addExpense = async (req, res) => {
 
 export const getExpenses = async (req, res) => {
     try {
-        const {page, fromDate, toDate} = req.query;
+        const {page, fromDate, toDate, dashboard} = req.query;
 
         const LIMIT = 6;
         const currentPage = page ? page : 1
@@ -61,17 +61,29 @@ export const getExpenses = async (req, res) => {
                 }
             });
         }
-
-        const expenses = await prisma.expense.findMany({
-            skip:skip,
-            take:LIMIT,
-            where:{
-                AND:[...filters]
-            },
-            orderBy:{
-                date:'desc'
-            }
-        });
+        console.log(filters)
+        let expenses = [];
+        if(dashboard){
+            expenses = await prisma.expense.findMany({
+                where:{
+                    AND:[...filters]
+                },
+                orderBy:{
+                    date:'desc'
+                }
+            });
+        }else{
+            expenses = await prisma.expense.findMany({
+                skip:skip,
+                take:LIMIT,
+                where:{
+                    AND:[...filters]
+                },
+                orderBy:{
+                    date:'desc'
+                }
+            });
+        }
         const expensesData = expenses.length == 0 ? [] : expenses
         return res.status(200).json({expenses:expensesData});
     } catch (error) {
