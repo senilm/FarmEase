@@ -2,7 +2,11 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
-import { Expense as ExpenseI, expenseError, filterDateInitialState } from "../lib/interfaces";
+import {
+  Expense as ExpenseI,
+  expenseError,
+  filterDateInitialState,
+} from "../lib/interfaces";
 import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import Navbar from "../components/Navbar";
@@ -19,7 +23,9 @@ const schema = z.object({
 const Expense = () => {
   const [amount, setAmount] = useState<string>("");
   const [note, setNote] = useState("");
-  const [expDate, setExpDate] = useState(new Date().toISOString().split('T')[0]);
+  const [expDate, setExpDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [errors, setErrors] = useState<expenseError>({});
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,7 +41,6 @@ const Expense = () => {
     setPage(1);
   };
 
-  
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^[0-9]+$/.test(value)) {
@@ -46,11 +51,11 @@ const Expense = () => {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
-      setLoading(true)
+      setLoading(true);
       const parseResponse = schema.safeParse({
         amount,
         note,
-        expDate
+        expDate,
       });
 
       if (parseResponse.error) {
@@ -67,7 +72,7 @@ const Expense = () => {
         body: JSON.stringify({
           amount: parseInt(amount, 10),
           note,
-          date:new Date(expDate)
+          date: new Date(expDate),
         }),
       });
       const res = await response.json();
@@ -93,19 +98,24 @@ const Expense = () => {
       setLoading(false);
       setAmount("");
       setNote("");
-      setExpDate(new Date().toISOString().split('T')[0])
+      setExpDate(new Date().toISOString().split("T")[0]);
     }
   };
 
   const fetchExpenses = async (page = 1) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/expense?page=${page}&fromDate=${dateFilter.fromFilterDate}&toDate=${dateFilter.toFilterDate}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${sessionStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/expense?page=${page}&fromDate=${
+          dateFilter.fromFilterDate
+        }&toDate=${dateFilter.toFilterDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
 
       const res = await response.json();
 
@@ -113,13 +123,12 @@ const Expense = () => {
         console.log(res?.message);
       }
 
-      if(page == 1){
+      if (page == 1) {
         setExpenses(res?.expenses);
-      }else{
-        setExpenses((prevExpenses) => [...prevExpenses, ...res?.expenses])
+      } else {
+        setExpenses((prevExpenses) => [...prevExpenses, ...res?.expenses]);
       }
       setHasMore(res?.expenses.length === 6);
-
     } catch (error) {
       console.log(error);
     }
@@ -132,15 +141,15 @@ const Expense = () => {
     setLoadingMore(false);
   };
 
-  useEffect(()=>{
-    fetchExpenses()
-  },[dateFilter])
+  useEffect(() => {
+    fetchExpenses();
+  }, [dateFilter]);
 
   return (
     <div>
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 pt-4 sm:px-6 lg:px-8">
+      <div className="md:max-w-3xl mx-auto px-4 pt-4 max-sm:px-7 sm:px-6 lg:px-8">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-[#f5f5f5] px-6 py-8 sm:px-10 sm:py-12">
             <h1 className="text-3xl font-bold text-[#333] mb-4">Expense</h1>
@@ -191,7 +200,7 @@ const Expense = () => {
               </div>
 
               <div className="grid gap-2 ">
-              <label
+                <label
                   htmlFor="check-in"
                   className="text-sm font-medium text-[#333]"
                 >
@@ -227,21 +236,21 @@ const Expense = () => {
           </div>
         </div>
       </div>
-     
+
       <div className="pt-5 mt-5 pb-5 bg-red-50">
-      <div className=" text-center font-bold text-3xl mb-5">Expenses</div>
-      <div className="px-10 flex items-center gap-5">
+        <div className=" text-center font-bold text-3xl mb-5">Expenses</div>
+        <div className="px-10 flex items-center gap-5 flex-wrap">
           <div className=" flex items-center gap-2 text-lg">
-                <p className=" text-[#6b4226]">From: </p>
-                <input
-                  type="date"
-                  className="p-1 rounded-lg border"
-                  name="fromFilterDate"
-                  value={dateFilter.fromFilterDate}
-                  onChange={handleDateChange}
-                />
+            <p className=" text-[#6b4226]">From: </p>
+            <input
+              type="date"
+              className="p-1 rounded-lg border"
+              name="fromFilterDate"
+              value={dateFilter.fromFilterDate}
+              onChange={handleDateChange}
+            />
           </div>
-          <div className=" flex items-center gap-2 text-lg">
+          <div className=" flex items-center gap-2 text-lg max-sm:gap-[1.9rem]">
             <p className=" text-[#6b4226]">To: </p>
             <input
               type="date"
@@ -251,7 +260,7 @@ const Expense = () => {
               onChange={handleDateChange}
             />
           </div>
-      </div>
+        </div>
         <ExpenseSection expenses={expenses} refetch={fetchExpenses} />
         {hasMore && (
           <div className="flex justify-center mt-6">
@@ -265,7 +274,6 @@ const Expense = () => {
           </div>
         )}
       </div>
-      
     </div>
   );
 };

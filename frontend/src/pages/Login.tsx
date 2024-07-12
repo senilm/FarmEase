@@ -97,8 +97,9 @@ const Login = () => {
 
   return (
     <div className=" w-full min-h-screen flex justify-center items-center">
-      <div className="min-w-[23rem] m-10 xs:m-16 px-10 py-5 rounded-lg  shadow-lg ">
-        <div className=" text-3xl font-bold  text-center text-[#6b4226]">Login</div>
+      <div className="md:min-w-[23rem] min-w-[19rem] m-10 xs:m-16  px-10 py-5 rounded-lg  shadow-lg bg-white ">
+        <div className=" text-3xl font-bold  text-center text-[#6b4226]">JK Farm</div>
+        <div className=" text-xl font-semibold  text-center text-[#6b4226] mt-3">Login</div>
         <div className=" text-red-400 mt-4 text-center">{apiError}</div>
         <div className=" mt-5">
           <form onSubmit={handleSubmit} className=" flex flex-col gap-8 ">

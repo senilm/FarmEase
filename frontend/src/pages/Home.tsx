@@ -75,10 +75,10 @@ const Home = () => {
     <section className=" w-full min-h-screen ">
       <Navbar />
       {/* calender */}
-      <div className=" px-5">
-        <div className=" min-h-[85vh]">
-          <div className="p-5">
-            <div className=" py-2">
+      <div className=" max-sm:mt-3 px-5">
+        <div className="max-sm:min-h-[50vh] min-h-[85vh]">
+          <div className="px-5 py-5 max-sm:px-0">
+            <div className=" py-2" style={{ height: '500px', overflowY: 'auto' }}>
               {loading ? (
                 <div className=" text-center">Loading</div>
               ) : (
@@ -87,7 +87,7 @@ const Home = () => {
                   events={events}
                   startAccessor="start"
                   endAccessor="end"
-                  style={{ height: 500 }}
+                  style={{ height: '100%', minWidth: '100%' }}
                   views={["month"]}
                   
                 />
@@ -99,7 +99,7 @@ const Home = () => {
 
       {/* Bookings */}
       {isAdmin ? 
-      <div className="pt-5 mt-5 bg-slate-50 pb-5">
+      <div className="pt-5 max-sm:mt-0 mt-5 bg-slate-50 pb-5">
         <div className=" text-center font-bold text-3xl mb-5">Bookings</div>
         <BookingSection bookings={bookings} refetch={fetchBookings} />
         <div className=" px-10">

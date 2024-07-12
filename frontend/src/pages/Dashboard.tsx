@@ -126,26 +126,29 @@ const Dashboard = () => {
   }, [dateFilter]);
 
   const handleGeneratePDF = async () => {
-    const title = `${reverseDate(dateFilter.fromFilterDate)} To ${reverseDate(dateFilter.toFilterDate)}`
-    const blob = await pdf(GeneratePdf(transactions, totalIncome, totalExpense, balance, title)).toBlob();
+    const title = `${reverseDate(dateFilter.fromFilterDate)} To ${reverseDate(
+      dateFilter.toFilterDate
+    )}`;
+    const blob = await pdf(
+      GeneratePdf(transactions, totalIncome, totalExpense, balance, title)
+    ).toBlob();
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${title}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }
+  };
 
   return (
     <section>
       <Navbar />
-      <div className="px-10 mt-5">
-        <div className="px-4  py-4 sm:px-6 lg:px-8 border rounded-lg min-h-[80vh] max-h-[80vh] flex justify-between gap-2 mb-5">
-          
+      <div className="md:px-10 px-5 mt-5">
+        <div className="px-4  py-4 sm:px-6 lg:px-8 border rounded-lg md:min-h-[80vh] md:max-h-[80vh] flex justify-between gap-2 mb-5 flex-wrap-reverse">
           {/* Left side */}
-          <div className=" flex  flex-col justify-between gap-3 w-[38%] py-4 ">
+          <div className=" flex max-sm:w-full  flex-col justify-between gap-3 md:w-[38%] py-4 ">
             <div>
               <DashboardCard title="Income" value={totalIncome} />
             </div>
@@ -159,39 +162,47 @@ const Dashboard = () => {
           </div>
 
           {/* right side */}
-          <div className=" w-[60%] flex flex-col py-4 ">
-            <div className=" flex justify-between gap-5">
-              <div className=" flex items-center gap-2 flex-1">
-                <Label htmlFor="from">From</Label>
-                <Input
-                  id="from"
-                  type="date"
-                  className="p-1 rounded-lg border"
-                  name="fromFilterDate"
-                  value={dateFilter.fromFilterDate}
-                  onChange={handleDateChange}
-                />
-              </div>
-              <div className=" flex items-center gap-3 flex-1">
-                <Label htmlFor="to">To</Label>
-                <Input
-                  id="to"
-                  type="date"
-                  className="p-1  rounded-lg border"
-                  name="toFilterDate"
-                  value={dateFilter.toFilterDate}
-                  onChange={handleDateChange}
-                />
-              </div>
-              <Button className=" flex  gap-2 bg-[#6b4226] hover:bg-[#4d2e1b]" onClick={handleGeneratePDF} disabled={transactions.length == 0}>
-                <span>
-                  <DownloadIcon width={18} />
-                </span>
-                Download
-              </Button>
+          <div className=" md:w-[60%] flex flex-col py-4 ">
+            <div className=" flex justify-between gap-5 flex-wrap">
+              <div className=" flex  gap-4 flex-wrap justify-between">
+                <div className=" flex items-center gap-2 flex-1">
+                  <Label htmlFor="from">From:</Label>
+                  <Input
+                    id="from"
+                    type="date"
+                    className="p-1 rounded-lg border"
+                    name="fromFilterDate"
+                    value={dateFilter.fromFilterDate}
+                    onChange={handleDateChange}
+                  />
+                </div>
+                <div className=" flex items-center gap-3 max-sm:gap-[1.7rem] flex-1">
+                  <Label htmlFor="to">To:</Label>
+                  <Input
+                    id="to"
+                    type="date"
+                    className="p-1  rounded-lg border"
+                    name="toFilterDate"
+                    value={dateFilter.toFilterDate}
+                    onChange={handleDateChange}
+                  />
+                </div>
+                  </div>
+                <div className=" flex  justify-center max-sm:w-full">
+                  <Button
+                    className=" flex  gap-2 bg-[#6b4226] hover:bg-[#4d2e1b]"
+                    onClick={handleGeneratePDF}
+                    disabled={transactions.length == 0}
+                  >
+                    <span>
+                      <DownloadIcon width={18} />
+                    </span>
+                    Download
+                  </Button>
+                </div>
             </div>
 
-            <div className=" flex flex-col mt-6 border rounded-lg px-6 py-3 flex-grow  max-h-[60vh] overflow-auto">
+            <div className=" flex flex-col mt-6 border rounded-lg px-2 md:px-6 py-3 flex-grow max-h-[40vh]  md:max-h-[60vh] overflow-auto">
               <div className=" text-center mb-3 text-xl text-[#6b4226] font-semibold">
                 Transactions
               </div>
@@ -207,29 +218,31 @@ const Dashboard = () => {
                     )}
                   </div>
                 ) : (
-                  transactions.map((transaction, index) => (
-                    transaction.type === "Income" ? 
-                    <DashboardFeedItem
-                      key={index}
-                      amount={transaction.amount}
-                      date={`${formatDate(transaction?.fromDate.toString())} - ${formatDate(transaction.toDate?.toString())}`}
-                      type={transaction.type}
-                      text={transaction.User?.name || ""}
-                    />
-                    :
-                    <DashboardFeedItem
-                      key={index}
-                      amount={transaction.amount}
-                      date={`${formatDate(transaction.date.toString())}`}
-                      type={transaction.type}
-                      text={transaction?.note || "" }
-                    />
-                  ))
+                  transactions.map((transaction, index) =>
+                    transaction.type === "Income" ? (
+                      <DashboardFeedItem
+                        key={index}
+                        amount={transaction.amount}
+                        date={`${formatDate(
+                          transaction?.fromDate.toString()
+                        )} - ${formatDate(transaction.toDate?.toString())}`}
+                        type={transaction.type}
+                        text={transaction.User?.name || ""}
+                      />
+                    ) : (
+                      <DashboardFeedItem
+                        key={index}
+                        amount={transaction.amount}
+                        date={`${formatDate(transaction.date.toString())}`}
+                        type={transaction.type}
+                        text={transaction?.note || ""}
+                      />
+                    )
+                  )
                 )}
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

@@ -9,7 +9,12 @@ import {
   SelectItem,
 } from "../components/ui/select";
 import { z } from "zod";
-import { Booking as BookingI, FormErrors, filterDateInitialState, optionType } from "../lib/interfaces";
+import {
+  Booking as BookingI,
+  FormErrors,
+  filterDateInitialState,
+  optionType,
+} from "../lib/interfaces";
 import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import Navbar from "../components/Navbar";
@@ -25,7 +30,6 @@ const schema = z.object({
   }),
   person: z.string().min(1, { message: "Please select a user" }),
 });
-
 
 const Booking = () => {
   const [amount, setAmount] = useState<string>("");
@@ -136,7 +140,11 @@ const Booking = () => {
   const fetchBookings = async (page = 1) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/booking?page=${page}&type=${type}&fromDate=${dateFilter.fromFilterDate}&toDate=${dateFilter.toFilterDate}`,
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/booking?page=${page}&type=${type}&fromDate=${
+          dateFilter.fromFilterDate
+        }&toDate=${dateFilter.toFilterDate}`,
         {
           method: "GET",
           headers: {
@@ -182,7 +190,7 @@ const Booking = () => {
   return (
     <div>
       <Navbar />
-      <div className="max-w-3xl mx-auto px-4 pt-4 sm:px-6 lg:px-8 ">
+      <div className="md:max-w-3xl mx-auto w-full md:px-4 max-sm:px-7 pt-4 sm:px-6 lg:px-8 ">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-[#f5f5f5] px-6 py-8 sm:px-10 sm:py-12">
             <div className=" flex items-start gap-5">
@@ -309,43 +317,55 @@ const Booking = () => {
       </div>
 
       <div className="pt-5 mt-5 bg-slate-50 pb-5">
-        <div className=" text-center font-bold text-3xl mb-10 mt-3">Bookings</div>
-        <div className="px-10 flex items-center gap-5">
-          <Button
-            onClick={() => {setType("self"); setPage(1)}}
-            disabled={type == "self"}
-            className="cursor-pointer bg-[#6b4226] text-white hover:bg-[#4d2e1b]"
-          >
-            My Bookings
-          </Button>
-          {isAdmin ? (
+        <div className=" text-center font-bold text-3xl mb-10 mt-3">
+          Bookings
+        </div>
+        <div className="px-10 flex items-center gap-5 flex-wrap max-sm:justify-center">
+          <div className=" flex gap-3">
             <Button
-              onClick={() => {setType("all"); setPage(1)}}
-              disabled={type == "all"}
-              className="bg-[#6b4226] cursor-pointer text-white hover:bg-[#4d2e1b]"
+              onClick={() => {
+                setType("self");
+                setPage(1);
+              }}
+              disabled={type == "self"}
+              className="cursor-pointer bg-[#6b4226] text-white hover:bg-[#4d2e1b]"
             >
-              All Bookings
+              My Bookings
             </Button>
-          ) : null}
-          <div className=" flex items-center gap-2 text-lg">
-            <p className=" text-[#6b4226]">From: </p>
-            <input
-              type="date"
-              className="p-1 rounded-lg border"
-              name="fromFilterDate"
-              value={dateFilter.fromFilterDate}
-              onChange={handleDateChange}
-            />
+            {isAdmin ? (
+              <Button
+                onClick={() => {
+                  setType("all");
+                  setPage(1);
+                }}
+                disabled={type == "all"}
+                className="bg-[#6b4226] cursor-pointer text-white hover:bg-[#4d2e1b]"
+              >
+                All Bookings
+              </Button>
+            ) : null}
           </div>
-          <div className=" flex items-center gap-2 text-lg">
-            <p className=" text-[#6b4226]">To: </p>
-            <input
-              type="date"
-              className="p-1  rounded-lg border"
-              name="toFilterDate"
-              value={dateFilter.toFilterDate}
-              onChange={handleDateChange}
-            />
+          <div className=" flex gap-3 flex-wrap">
+            <div className=" flex items-center gap-2 text-lg">
+              <p className=" text-[#6b4226]">From: </p>
+              <input
+                type="date"
+                className="p-1 rounded-lg border"
+                name="fromFilterDate"
+                value={dateFilter.fromFilterDate}
+                onChange={handleDateChange}
+              />
+            </div>
+            <div className=" flex items-center gap-2 text-lg max-sm:gap-[1.9rem]">
+              <p className=" text-[#6b4226]">To: </p>
+              <input
+                type="date"
+                className="p-1  rounded-lg border"
+                name="toFilterDate"
+                value={dateFilter.toFilterDate}
+                onChange={handleDateChange}
+              />
+            </div>
           </div>
         </div>
         <BookingSection bookings={bookings} refetch={fetchBookings} />
