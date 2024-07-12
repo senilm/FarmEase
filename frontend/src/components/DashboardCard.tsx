@@ -34,7 +34,7 @@ interface DashboardCardProps {
         <div className={`text-3xl ${textColor}`}>
           {sign}{value}
         </div>
-        <div className={`text-3xl text-[#6b4226] hover:text-[#4d2e1b] font-semibold`}>{title}</div>
+        <div className={`md:text-3xl max-sm:text-xl flex items-center text-[#6b4226] hover:text-[#4d2e1b] font-semibold`}>{title}</div>
       </div>
     );
   };
