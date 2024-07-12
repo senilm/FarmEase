@@ -37,6 +37,18 @@ export interface Expense {
   note: string;
 }
 
+export interface Transaction {
+  id: string;
+  date: Date;
+  amount: number;
+  type: "Income" | "Expense";
+  fromDate: Date; 
+  toDate: Date;   
+  note?: string;   
+  userId?: string; 
+  User?: User;     
+}
+
 export type optionType = {
   id: string;
   name: string;
