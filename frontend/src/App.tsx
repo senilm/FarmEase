@@ -4,11 +4,18 @@ import Booking from "./pages/Booking";
 import Expense from "./pages/Expense";
 import Home from "./pages/Home";
 import { ProtectedRouteProps } from "./lib/interfaces";
+import Dashboard from "./pages/Dashboard";
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const isAuth = sessionStorage.getItem("token") ? true : false;
   return isAuth ? children : <Navigate to="/" />;
 };
+
+const AdminRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const isAdmin = sessionStorage.getItem('type') == "ADMIN";
+  return isAdmin ? children : <Navigate to="/home" />;
+};
+
 
 function App() {
   return (
@@ -36,6 +43,16 @@ function App() {
           element={
             <ProtectedRoute>
               <Expense />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+              <Dashboard />
+              </AdminRoute>
             </ProtectedRoute>
           }
         />

@@ -48,6 +48,16 @@ const Navbar = () => {
             Expense
           </Button>
         </Link>
+        <Link
+          to="/dashboard"
+          className={`border rounded-lg ${
+            pathname === "/dashboard" ? "bg-gray-200 dark:bg-gray-800 " : ""
+          } `}
+        >
+          <Button disabled={pathname === "/dashboard"} variant={"ghost"}>
+            Dashboard
+          </Button>
+        </Link>
         <div className="border rounded-lg" >
           <Button className="bg-[#6b4226] hover:bg-[#4d2e1b]" onClick={logOut}>Logout</Button>
         </div>
