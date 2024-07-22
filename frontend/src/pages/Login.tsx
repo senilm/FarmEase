@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {z} from "zod"
-import { loginFormError, optionType } from "../lib/interfaces";
+import { loginFormError } from "../lib/interfaces";
 import { useNavigate } from "react-router-dom";
 
 const schema = z.object({
-  person:z.string().min(1, {message:"Please select a name"}),
+  person:z.string().min(1, {message:"Please enter email"}),
   password:z.string().min(1, {message:"Please select a password"})
 })
 
@@ -27,7 +20,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<loginFormError>({});
   const [apiError, setApiError] = useState("");
-  const [options, setOptions] = useState<optionType[]>([]);
 
  
   const togglePasswordVisibility = () => {
@@ -72,61 +64,32 @@ const Login = () => {
     }
   }
 
-  const getUsers = async () => {
-    try {
-        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/users`, {
-          method:"GET",
-          headers:{
-            "Content-Type":"application/json",
-            "authorization": `Bearer ${sessionStorage.getItem("token")}`
-          }
-        })
-        const response = await res.json();
-        if(!res.ok){
-          console.log(response.message)
-        }
-        setOptions(response.users)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  
-  useEffect(()=>{
-    getUsers();
-  },[])
+
 
   return (
     <div className=" w-full min-h-screen flex justify-center items-center">
       <div className="md:min-w-[23rem] min-w-[19rem] m-10 xs:m-16  px-10 py-5 rounded-lg  shadow-lg bg-white ">
-        <div className=" text-3xl font-bold  text-center text-[#6b4226]">JK Farm</div>
-        <div className=" text-xl font-semibold  text-center text-[#6b4226] mt-3">Login</div>
+        <div className=" text-3xl font-semibold  text-center text-[#6b4226] mt-3">Login</div>
         <div className=" text-red-400 mt-4 text-center">{apiError}</div>
         <div className=" mt-5">
           <form onSubmit={handleSubmit} className=" flex flex-col gap-8 ">
+
             {/* User */}
             <div className=" flex flex-col gap-1">
               <Label
                 htmlFor="guest-name"
                 className="text-sm font-medium text-[#333]"
               >
-                Name
+                Email
               </Label>
-              <Select
-              value={person}
-              onValueChange={(value) => setPerson(value)}
-              >
-                <SelectTrigger
-                  id="guest-name"
-                  className="bg-white border-[#ccc] rounded-md px-4 py-2 text-[#333] focus:border-[#666] focus:ring-0"
-                >
-                  <SelectValue placeholder="Select a name" />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.map((option) => {
-                     return <SelectItem value={option.email} key={option.id}>{option.name}</SelectItem>
-                  })}
-                </SelectContent>
-              </Select>
+              <Input
+                autoComplete="current-password"
+                id="guest-name"
+                name="name"
+                placeholder="Email"
+                value={person}
+                onChange={(e) =>setPerson(e.target.value)}
+              />
               {errors.person && (
                 <span className="text-red-500 text-sm">{errors.person[0]}</span>
               )}
