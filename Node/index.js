@@ -4,6 +4,7 @@ import { authMiddleware } from './middlewares/authMiddleware.js';
 import bookingRouter from './routes/booking.js'
 import expenseRouter from './routes/expense.js'
 import userRouter from './routes/users.js'
+import farmRouter from './routes/farm.js'
 import notFoundMiddleware from './middlewares/notFound.js';
 import cors from "cors"
 
@@ -16,6 +17,7 @@ app.use(cors());
 app.use('/auth', authRouter);
 app.use('/booking', authMiddleware ,bookingRouter)
 app.use('/expense', authMiddleware, expenseRouter )
+app.use('/farm', authMiddleware, farmRouter )
 app.use('/users', userRouter )
 
 
@@ -27,4 +29,3 @@ app.use(notFoundMiddleware)
 app.listen(3000, ()=>{
     console.log("running on 3000");
 })
-
