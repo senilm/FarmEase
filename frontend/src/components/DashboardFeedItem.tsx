@@ -26,7 +26,7 @@ const DashboardFeedItem: React.FC<DashboardFeedItemProps> = ({
         {amount}
       </div>
       <div className="flex-1 font-semibold text-sm">{text}</div>
-      <div className=" font-semibold max-w-[40%]">{date}</div>
+      <div className=" font-semibold max-w-[50%] md:text-sm max-sm:text-xs">{date}</div>
     </div>
   );
 };
