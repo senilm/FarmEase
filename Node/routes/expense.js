@@ -3,7 +3,7 @@ import { addExpense, getExpense, getExpenses, updateExpense, deleteExpense } fro
 const router = express.Router()
 
 
-router.route('/').get(getExpenses)
+router.route('/farm/:farmId').get(getExpenses)
 router.route('/:expenseId').get(getExpense)
 router.route('/:expenseId').delete(deleteExpense)
 router.route('/:expenseId').patch(updateExpense)
