@@ -2,10 +2,10 @@ import prisma from "../utils/PrismaClient.js"
 
 export const addExpense = async (req, res) => {
     try {
-        const {amount, note, date} = req.body;
+        const {amount, note, date, farmId} = req.body;
         const {id} = req.user;
 
-        if(!note || !amount || amount <= 0){
+        if(!note || !amount || amount <= 0 || !farmId){
             return res.status(400).json({message:"Please provide all the details"})
         }
     
@@ -17,6 +17,11 @@ export const addExpense = async (req, res) => {
                 User:{
                     connect:{
                         id:id
+                    }
+                },
+                Farm:{
+                    connect:{
+                        id:farmId
                     }
                 }
             }
@@ -36,12 +41,16 @@ export const addExpense = async (req, res) => {
 export const getExpenses = async (req, res) => {
     try {
         const {page, fromDate, toDate, dashboard} = req.query;
-
+        const {farmId} = req.params;
         const LIMIT = 6;
         const currentPage = page ? page : 1
         const skip = (currentPage - 1) * LIMIT;
 
         const filters = [];
+
+        filters.push({
+            farmId:farmId
+        })
 
         if(fromDate){
             filters.push({
@@ -61,12 +70,18 @@ export const getExpenses = async (req, res) => {
                 }
             });
         }
-        console.log(filters)
         let expenses = [];
         if(dashboard){
             expenses = await prisma.expense.findMany({
                 where:{
                     AND:[...filters]
+                },
+                include:{
+                    Farm:{
+                        select:{
+                            name:true
+                        }
+                    }
                 },
                 orderBy:{
                     date:'desc'
@@ -78,6 +93,13 @@ export const getExpenses = async (req, res) => {
                 take:LIMIT,
                 where:{
                     AND:[...filters]
+                },
+                include:{
+                    Farm:{
+                        select:{
+                            name:true
+                        }
+                    }
                 },
                 orderBy:{
                     date:'desc'
@@ -94,6 +116,7 @@ export const getExpenses = async (req, res) => {
 export const getExpense = async (req, res) => {
     try {
         const expenseId = req.params.expenseId;
+        
         if(!expenseId){
             return res.status(400).json({message:"Please provide required details"})
         }

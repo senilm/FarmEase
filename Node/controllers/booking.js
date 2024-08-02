@@ -2,18 +2,36 @@ import prisma from "../utils/PrismaClient.js"
 
 export const addBooking = async (req, res) => {
     try {
-        const {fromDate, toDate, userId, amount} = req.body;
+        const {fromDate, toDate, amount, farmId} = req.body;
+        const {id:userId} = req.user;
 
-        if(!fromDate || !toDate || !userId || !amount || amount <= 0){
+        if(!fromDate || !toDate || !userId || !amount || amount <= 0 || !farmId){
             return res.status(400).json({message:"Please provide all the details"})
         }
         
         if(fromDate > toDate){
             return res.status(400).json({message:"Select valid dates"})
         }
-        // Missing cases
-        // 1) jo 24 thi 25 nu book hoy ane kok 22 thi 27 kari de book thai jase, je no thavu joie
-        // 2) 24 thi 28 book hoy to 25 thi 26 nu book thavu no joie
+        const overlappingBooking = await prisma.booking.findFirst({
+            where: {
+                farmId: farmId,
+                OR: [
+                    {
+                        fromDate: {
+                            lt: toDate,
+                        },
+                        toDate: {
+                            gt: fromDate,
+                        },
+                    },
+                ],
+            },
+        });
+
+        if (overlappingBooking) {
+            return res.status(400).json({ message: "The selected dates overlap with an existing booking" });
+        }
+
         const booking = await prisma.booking.create({
             data:{
                 fromDate:fromDate,
@@ -23,6 +41,11 @@ export const addBooking = async (req, res) => {
                     connect:{
                         id:userId
                     }
+                },
+                Farm:{
+                    connect:{
+                        id:farmId
+                    }
                 }
             }
         });
@@ -31,26 +54,31 @@ export const addBooking = async (req, res) => {
             return res.status(400).json({message:"Failed to add booking"})
         }
         
-        return res.status(200).json({message:"Successfully added booking"});
+        return res.status(201).json({message:"Successfully added booking"});
     } catch (error) {
         console.error(error)
         if(error.code == "P2002"){
             return res.status(500).json({message:"Already booked!!"})
         }
-        return res.status(500).json({message:"Interval Server Error, Please try again later"})
+        return res.status(500).json({message:"Internal Server Error, Please try again later"})
     }
 }
 
 export const getBookings = async (req, res) => {
     try {
         const {fromDate, toDate, fromAmount,toAmount, page, type, dashboard} = req.query;
-
+        const {farmId} = req.params;
+        
         const LIMIT = 6;
         const currentPage = page ? page : 1
         const skip = (currentPage - 1) * LIMIT;
         const {id} = req.user;
 
         const filters = [];
+
+        filters.push({
+            farmId:farmId
+        })
 
         if(fromDate){
             filters.push({
@@ -101,51 +129,83 @@ export const getBookings = async (req, res) => {
             toDate:'desc'
         })
 
-        let bookings = [];
+        // let bookings = [];
+        // if(dashboard){
+        //     bookings = await prisma.booking.findMany({
+        //         where: {
+        //             AND:[...filters]
+        //         },
+        //         include:{
+        //             User:{
+        //                 select:{
+        //                     name:true
+        //                 }
+        //             }
+        //         },
+        //         orderBy:orderObj
+        //     });
+        // }else{
+        //     bookings = await prisma.booking.findMany({
+        //         skip:skip,
+        //         take:LIMIT,
+        //         where: {
+        //             AND:[...filters]
+        //         },
+        //         include:{
+        //             User:{
+        //                 select:{
+        //                     name:true
+        //                 }
+        //             }
+        //         },
+        //         orderBy:orderObj
+        //     });
+        // }
 
-        if(dashboard){
-            bookings = await prisma.booking.findMany({
-                where: {
-                    AND:[...filters]
+        const bookings = await prisma.booking.findMany({
+            skip: dashboard ? undefined : skip,
+            take: dashboard ? undefined : LIMIT,
+            where: {
+                AND: filters,
+            },
+            include: {
+                User: {
+                    select: {
+                        name: true,
+                    },
                 },
-                include:{
-                    User:{
-                        select:{
-                            name:true
-                        }
+                Farm:{
+                    select:{
+                        name:true
                     }
-                },
-                orderBy:orderObj
-            });
-        }else{
-            bookings = await prisma.booking.findMany({
-                skip:skip,
-                take:LIMIT,
-                where: {
-                    AND:[...filters]
-                },
-                include:{
-                    User:{
-                        select:{
-                            name:true
-                        }
-                    }
-                },
-                orderBy:orderObj
-            });
-        }
-        const bookingsData = bookings.length == 0 ? [] : bookings
-        return res.status(200).json({bookings:bookingsData});
+                }
+            },
+            orderBy: orderObj,
+        });
+
+
+        return res.status(200).json({ bookings });
+
     } catch (error) {
-        return res.status(500).json({message:"Interval Server Error, Please try again later"})
+        return res.status(500).json({message:"Internal Server Error, Please try again later"})
     }
 }
 
 export const getAllBooking = async (req, res) => {
     try {
+        const {farmId} = req.params;
+
         const bookings = await prisma.booking.findMany({
+            where:{
+                farmId:farmId
+            },
             include:{
                 User:{
+                    select:{
+                        name:true
+                    }
+                },
+                Farm:{
                     select:{
                         name:true
                     }
@@ -155,17 +215,17 @@ export const getAllBooking = async (req, res) => {
                 toDate:'desc'
             }
         });
-        const bookingsData = bookings.length == 0 ? [] : bookings
-        return res.status(200).json({bookings:bookingsData});
+        return res.status(200).json({ bookings });
     } catch (error) {
         console.log(error)
-        return res.status(500).json({message:"Interval Server Error, Please try again later"})
+        return res.status(500).json({message:"Internal Server Error, Please try again later"})
     }
 }
 
 export const getBooking = async (req, res) => {
     try {
-        const bookingId = req.params.bookingId;
+        const {bookingId} = req.params;
+
         if(!bookingId){
             return res.status(400).json({message:"Please provide required details"})
         }
@@ -175,13 +235,16 @@ export const getBooking = async (req, res) => {
                 id:bookingId
             }
         })
+
         if(!booking){
             return res.status(404).json({message:"Booking does not exist"})
         }
+
         return res.status(200).json({booking:booking});
+
     } catch (error) {
         console.log(error)
-        return res.status(500).json({message:"Interval Server Error, Please try again later"})
+        return res.status(500).json({message:"Internal Server Error, Please try again later"})
     }
 }
 
@@ -198,24 +261,50 @@ export const deleteBooking = async (req, res) => {
             }
         })
 
-        if(!booking){
-            return res.status(404).json({message:"Booking does not exist"})
-        }
-
         return res.status(200).json({message:"Successfully deleted booking"});
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message:"Interval Server Error, Please try again later"})
+        console.error(error);
+        if (error.code === 'P2025') {
+            return res.status(404).json({ message: "Booking does not exist" });
+        }
+        return res.status(500).json({message:"Internal Server Error, Please try again later"})
     }
 }
 
 export const updateBooking = async (req, res) => {
     try {
         const bookingId = req.params.bookingId;
-        const {fromDate, toDate, amount, userId} = req.body
+        const {fromDate, toDate, amount, userId, farmId} = req.body
 
-        if(!bookingId || !fromDate || !toDate || !userId || !amount || amount <= 0){
+        if(!bookingId || !fromDate || !toDate || !userId || !amount || amount <= 0 || !farmId){
             return res.status(400).json({message:"Please provide required details"})
+        }
+
+        if(fromDate > toDate){
+            return res.status(400).json({message:"Select valid dates"})
+        }
+
+        const overlappingBooking = await prisma.booking.findFirst({
+            where: {
+                farmId: farmId,
+                id:{
+                    not:bookingId
+                },
+                OR: [
+                    {
+                        fromDate: {
+                            lt: toDate,
+                        },
+                        toDate: {
+                            gt:fromDate,
+                        },
+                    },
+                ],
+            },
+        });
+
+        if (overlappingBooking) {
+            return res.status(400).json({ message: "The selected dates overlap with an existing booking" });
         }
 
         const booking = await prisma.booking.update({
@@ -230,15 +319,21 @@ export const updateBooking = async (req, res) => {
                     connect:{
                         id:userId
                     }
+                },
+                Farm:{
+                    connect:{
+                        id:farmId
+                    }
                 }
             }
         })
-        if(!booking){
-            return res.status(404).json({message:"Failed to update booking"});
-        }
+       
         return res.status(200).json({message:"Successfully updated booking"});
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({message:"Interval Server Error, Please try again later"})
+        console.error(error);
+        if (error.code === 'P2025') {
+            return res.status(404).json({ message: "Booking does not exist" });
+        }
+        return res.status(500).json({message:"Internal Server Error, Please try again later"})
     }
 }
