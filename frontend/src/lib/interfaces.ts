@@ -2,24 +2,38 @@ export interface FormErrors {
   fromDate?: string[];
   toDate?: string[];
   amount?: string[];
-  person?: string[];
+  // person?: string[];
+  farm?: string[];
 }
 
+export interface addFarmErrorI{
+  name?: string[]
+}
+
+export interface addUserErrorI{
+  name?:string[];
+  role?: string[]
+}
 export interface loginFormError {
   person?: string[];
   password?: string[];
 }
 
+
 export interface expenseError {
   amount?: string[];
   note?: string[];
   expDate?: string[];
+  farm?: string[];
 }
 
 export interface User {
   name: string;
 }
 
+export interface FarmT{
+  name:string
+}
 export interface Booking {
   id: string;
   fromDate: Date;
@@ -28,6 +42,7 @@ export interface Booking {
   amount: number;
   date: Date;
   User: User;
+  Farm: FarmT
 }
 
 export interface Expense {
@@ -35,6 +50,7 @@ export interface Expense {
   date: Date;
   amount: number;
   note: string;
+  Farm: FarmT
 }
 
 export interface Transaction {
@@ -55,6 +71,12 @@ export type optionType = {
   email: string;
 };
 
+export type userType = {
+  id:string;
+  name:string;
+  email:string;
+  role:string
+}
 export interface ProtectedRouteProps {
   children: JSX.Element;
 }
@@ -62,4 +84,14 @@ export interface ProtectedRouteProps {
 export const filterDateInitialState = {
   fromFilterDate: "",
   toFilterDate: "",
+};
+
+
+export interface SearchAndSelectI {
+  onChange: (value: optionT) => void;
+}
+
+export type optionT = {
+  name: string;
+  id: string;
 };
