@@ -20,7 +20,7 @@ const Navbar = () => {
   return (
     <nav className="flex justify-between items-center py-2 px-5">
       <Link className="font-bold text-3xl text-[#6b4226] hover:text-[#4d2e1b]" to="/home">
-        JK Farm
+      FarmEase
       </Link>
       <button className="md:hidden" onClick={toggleMenu}>
         {isOpen ? (
@@ -74,7 +74,7 @@ const Navbar = () => {
           <div className="bg-white w-full h-full shadow-lg px-5 py-2 transform transition-transform duration-300 ease-in-out">
             <div className="flex justify-between items-center mb-4">
               <Link className="font-bold text-3xl text-[#6b4226] hover:text-[#4d2e1b]" to="/home">
-                JK Farm
+              FarmEase
               </Link>
               <button onClick={toggleMenu}>
                 <X className="w-6 h-6 text-[#6b4226]" />
