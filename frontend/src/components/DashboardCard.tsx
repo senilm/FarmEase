@@ -30,11 +30,11 @@ interface DashboardCardProps {
     }
   
     return (
-      <div className={`border flex justify-between rounded-lg ${bgColor} shadow-sm p-8`}>
-        <div className={`text-3xl ${textColor}`}>
+      <div className={`border flex flex-col justify-between rounded-lg ${bgColor} shadow-sm break-words md:p-3 max-sm:p-2`}>
+        <div className={`md:text-xl max-sm:text-lg ${textColor} text-center`}>
           {sign}{value}
         </div>
-        <div className={`md:text-3xl max-sm:text-xl flex items-center text-[#6b4226] hover:text-[#4d2e1b] font-semibold`}>{title}</div>
+        <div className={`md:text-2xl max-sm:text-sm flex items-center justify-center text-[#6b4226]  hover:text-[#4d2e1b] font-semibold`}>{title}</div>
       </div>
     );
   };
