@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { z } from "zod";
 import { loginFormError } from "../lib/interfaces";
@@ -73,7 +72,7 @@ const Login = () => {
         <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
           <img
             alt=""
-            src="https://images.unsplash.com/photo-1617195737496-bc30194e3a19?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+            src="https://images.unsplash.com/photo-1583138789007-daf8be3b54b9?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
           />
 
@@ -97,7 +96,7 @@ const Login = () => {
               Welcome to FarmEase
             </h2>
 
-            <p className="mt-4 leading-relaxed text-white/90">
+            <p className="mt-4 leading-relaxed text-white/90 ">
               Your Farm, Your Way, Powered by FarmEase.{" "}
             </p>
           </div>
@@ -106,8 +105,8 @@ const Login = () => {
           <div className="max-w-xl lg:max-w-3xl">
             <div className="relative -mt-16 block lg:hidden">
               <a
-                className="inline-flex size-16 items-center justify-center rounded-full bg-white text-blue-600 sm:size-20"
-                href="#"
+                className="inline-flex size-16 items-center justify-center rounded-full bg-white text-[#6b4226] sm:size-20"
+                href="/"
               >
                 <span className="sr-only">Home</span>
                 <svg
@@ -123,11 +122,11 @@ const Login = () => {
                 </svg>
               </a>
 
-              <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
+              <h1 className="mt-2 text-2xl font-bold text-[#6b4226] sm:text-3xl md:text-4xl">
                 Welcome to FarmEase
               </h1>
 
-              <p className=" leading-relaxed text-gray-500">
+              <p className=" leading-relaxed text-gray-500 text-sm">
                 Your Farm, Your Way, Powered by FarmEase.
               </p>
             </div>
@@ -201,20 +200,23 @@ const Login = () => {
               </div>
 
               <div className="col-span-12 flex sm:items-center sm:gap-4 justify-end ">
-                <Button className="bg-[#6b4226]" type="submit" disabled={loading}>
+                <Button
+                  className="bg-[#6b4226] hover:bg-[#4d2e1b]"
+                  type="submit"
+                  disabled={loading}
+                >
                   Login
                 </Button>
               </div>
 
               <div className=" col-span-12">
-              <NavigationLine
+                <NavigationLine
                   path="/register"
                   text1="New user?"
                   text2="Create an account here"
-                  
                 />
               </div>
-                <Toaster />
+              <Toaster />
             </form>
           </div>
         </main>
