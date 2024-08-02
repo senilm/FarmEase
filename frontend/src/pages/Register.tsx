@@ -73,7 +73,6 @@ const Register = () => {
           variant: "destructive",
         });
       }
-        console.log("Failed to Login, Please try again later")
     }finally{
       setLoading(false)
     }
