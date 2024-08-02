@@ -11,7 +11,10 @@ const ExpenseCard: React.FC<ExpenseCardProps> = ({ data, refetch }) => {
   return (
     <div className="border px-4 py-3 rounded-lg mb-2 bg-white shadow-lg">
       <div className=" flex justify-between ">
-        <p className=" font-bold text-red-500 text-xl">₹{data.amount}</p>
+        <div>
+          <div className=" font-bold text-red-500 text-xl">₹{data.amount}</div>
+          <p className=" font-semibold text-gray-500">{data.Farm.name}</p>
+        </div>
         <p>{formatDate(data.date.toString())}</p>
       </div>
       <div className=" flex justify-between mt-2">
