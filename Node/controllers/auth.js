@@ -9,33 +9,85 @@ export const login = async (req, res) => {
             return res.status(400).json({message:"Please provide required details"})
         }  
 
-        // check for email in db
-        // if not present then throw error saying user does not exist
+        // const doesUserExists = await prisma.user.findFirst({
+        //     where:{
+        //         email:email
+        //     },
+        //     include:{
+        //         Farm:{
+        //             select:{
+        //                 name:true,
+        //                 description:true,
+        //                 id:true,
+        //                 UserRole:{
+        //                     where:{
+        //                         userId:{
+        //                             equals:doesUserExists.id
+        //                         }
+        //                     },
+        //                     select:{
+        //                         role:true
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // })
+
         const doesUserExists = await prisma.user.findFirst({
             where:{
                 email:email
             }
         })
+
         if(!doesUserExists){
             return res.status(404).json({message:"User does not exist"})
         }
 
-        // get the user and compare the password
-        // if not matched then throw error saying invalid credential
+        const farms = await prisma.farm.findMany({
+            where:{
+                users:{
+                    some:{
+                        id:doesUserExists.id
+                    }
+                }
+            },
+            select:{
+                name:true,
+                description:true,
+                id:true,
+                UserRole:{
+                    where:{
+                        userId:doesUserExists.id
+                    },
+                    select:{
+                        role:true
+                    }
+                }
+            }
+        })
+
+
         const passwordResponse = await comparePassword(password, doesUserExists.password);
 
         if(!passwordResponse){
             return res.status(404).json({message:"Invalid Credentials"})
         }
 
-        // if matched then generate token and return that token
         const token = generateJWT(email, doesUserExists.id);
         if(!token){
             return res.status(500).json({message:"Failed to generate Token"})
         }
+        
+        const transformedUser = {
+            ...doesUserExists,
+            Farm: farms.map(({ UserRole, ...item }) => ({
+              ...item,
+              role: UserRole[0].role 
+            }))
+          };
 
-
-        return res.status(200).json({message:"Login Successful", token:token, type:doesUserExists.role})
+        return res.status(200).json({message:"Login Successful", token:token, user:transformedUser})
     } catch (error) {
         console.log(error);
         return res.status(500).json({message:error?.message ? error.message : "Internal server error, Please try again later"})
