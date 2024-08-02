@@ -2,168 +2,232 @@ import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import {z} from "zod"
+import { z } from "zod";
 import { loginFormError } from "../lib/interfaces";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import NavigationLine from "../components/NavigationLine";
 
-const schema = z.object({
-  person:z.string().min(1, {message:"Please enter email"}),
-  name:z.string().min(1, {message:"Please enter name"}),
-  password:z.string().min(1, {message:"Please select a password"})
-})
+const schema = z
+  .object({
+    person: z.string().min(1, { message: "Please enter email" }),
+    name: z.string().min(1, { message: "Please enter name" }),
+    password: z.string().min(1, { message: "Please select a password" }),
+    passwordConfirmation: z
+      .string()
+      .min(1, { message: "Please confirm your password" }),
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Passwords don't match",
+    path: ["passwordConfirmation"],
+  });
 
 const Register = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [person, setPerson] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [name, setName] = useState("");
-  const [errors, setErrors] = useState<loginFormError & {name?:string[]}>({});
+  const [errors, setErrors] = useState<
+    loginFormError & { name?: string[]; passwordConfirmation?: string[] }
+  >({});
   const [apiError, setApiError] = useState("");
   const { toast } = useToast();
 
- 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prevState) => !prevState);
-  };
-
-  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try{
-      const schemaParse = schema.safeParse({person, password, name});
-      if(schemaParse.error){
+    try {
+      const schemaParse = schema.safeParse({
+        person,
+        password,
+        name,
+        passwordConfirmation,
+      });
+      if (schemaParse.error) {
         setErrors(schemaParse.error.formErrors.fieldErrors);
         return;
       }
-      setLoading(true)
+      setLoading(true);
       setErrors({});
-      
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers:{
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email:person,
-          password:password,
-          name:name
-        }),
-      });
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: person,
+            password: password,
+            name: name,
+          }),
+        }
+      );
       const res = await response.json();
-      if(!response.ok){
-        setApiError(res?.message)
-        return;
-      }else{
-        toast({
-          title: "SUCCESS 💯",
-          description: res?.message,
-        });
-        navigate('/')
-      }
-    }catch(error:unknown){
-      if(error instanceof Error){
+      if (!response.ok) {
+        setApiError(res?.message);
         toast({
           title: "ERROR 👎👎",
-          description: error?.message || "Failed to Register, Please try again later",
+          description:
+            res?.message || "Failed to Register, Please try again later",
           variant: "destructive",
         });
+        return;
       }
-    }finally{
-      setLoading(false)
+      toast({
+        title: "SUCCESS 💯",
+        description: res?.message,
+      });
+      navigate("/");
+    } catch (error: unknown) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className=" w-full min-h-screen flex justify-center items-center">
-      <div className="md:min-w-[23rem] min-w-[19rem] m-10 xs:m-16  px-10 py-5 rounded-lg  shadow-lg bg-white ">
-        <div className=" text-3xl font-semibold  text-center text-[#6b4226] mt-3">Register</div>
-        <div className=" text-red-400 mt-4 text-center">{apiError}</div>
-        <div className=" mt-5">
-          <form onSubmit={handleSubmit} className=" flex flex-col gap-8 ">
+    <section className="bg-white">
+      <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
+        <aside className="relative block h-16 lg:order-last lg:col-span-5 lg:h-full xl:col-span-6">
+          <img
+            alt=""
+            src="https://images.unsplash.com/photo-1583138789007-daf8be3b54b9?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </aside>
 
-            {/* User */}
-            <div className=" flex flex-col gap-1">
-              <Label
-                htmlFor="name"
-                className="text-sm font-medium text-[#333]"
-              >
-                Name
-              </Label>
-              <Input
-                type="text"                
-                id="name"
-                name="userName"
-                placeholder="Name"
-                value={name}
-                onChange={(e) =>setName(e.target.value)}
-              />
-              {errors.name && (
-                <span className="text-red-500 text-sm">{errors.name[0]}</span>
-              )}
-            </div>
+        <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-10 xl:col-span-6">
+          <div className="max-w-xl lg:max-w-3xl">
+            <h1 className="mt-6 text-2xl font-bold  sm:text-3xl md:text-4xl text-[#6b4226]">
+              Welcome to FarmEase
+            </h1>
+            <div className=" text-red-400 mt-4">{apiError}</div>
 
-            {/* User */}
-            <div className=" flex flex-col gap-1">
-              <Label
-                htmlFor="guest-name"
-                className="text-sm font-medium text-[#333]"
-              >
-                Email
-              </Label>
-              <Input
-                type="email"                
-                id="guest-name"
-                name="name"
-                placeholder="Email"
-                value={person}
-                onChange={(e) =>setPerson(e.target.value)}
-              />
-              {errors.person && (
-                <span className="text-red-500 text-sm">{errors.person[0]}</span>
-              )}
-            </div>
-
-            {/* password */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-              <Input
-                autoComplete="current-password"
-                id="password"
-                name="password"
-                placeholder="******"
-                value={password}
-                onChange={(e) =>setPassword(e.target.value)}
-                type={showPassword ? "text" : "password"}
-              />
-              <span
-                  className="absolute top-1 right-0 mt-2 mr-2 cursor-pointer"
-                  onClick={togglePasswordVisibility}
+            <form
+              onSubmit={handleSubmit}
+              className="mt-5 grid grid-cols-6 gap-6 max-sm:mt-10"
+            >
+              <div className="col-span-12">
+                <Label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  {showPassword ? <EyeOffIcon className="w-5 h-4"/> : <EyeIcon className="w-5 h-4" /> }
-                </span>
-              </div>
-              {errors.password && (
-                <span className="text-red-500 text-sm">{errors.password[0]}</span>
-              )}
-              
-            </div>
+                  Name
+                </Label>
 
-            {/* Button */}
-            <Button className="mb-5 bg-[#6b4226] text-white rounded-md px-6 py-2 hover:bg-[#4d2e1b]" type="submit" disabled={loading}>
-              {loading ? "..." : "Register"}
-            </Button>
-          </form>
-          <NavigationLine path="/" text1="Already have an account?" text2="Login here"/>
-          <Toaster/>
-        </div>
+                <Input
+                  type="text"
+                  id="name"
+                  name="userName"
+                  placeholder="Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+                />
+                {errors.name && (
+                  <span className="text-red-500 text-sm">{errors.name[0]}</span>
+                )}
+              </div>
+
+              <div className="col-span-12">
+                <Label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </Label>
+
+                <Input
+                  type="email"
+                  id="email"
+                  name="name"
+                  placeholder="Email"
+                  value={person}
+                  onChange={(e) => setPerson(e.target.value)}
+                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+                />
+                {errors.person && (
+                  <span className="text-red-500 text-sm">
+                    {errors.person[0]}
+                  </span>
+                )}
+              </div>
+
+              <div className="col-span-12 sm:col-span-6">
+                <label
+                  htmlFor="Password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+
+                <Input
+                  autoComplete="current-password"
+                  id="password"
+                  name="password"
+                  placeholder="******"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+                />
+                {errors.password && (
+                  <span className="text-red-500 text-sm">
+                    {errors.password[0]}
+                  </span>
+                )}
+              </div>
+
+              <div className="col-span-12 sm:col-span-6">
+                <label
+                  htmlFor="PasswordConfirmation"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password Confirmation
+                </label>
+
+                <Input
+                  type="password"
+                  id="PasswordConfirmation"
+                  name="password_confirmation"
+                  value={passwordConfirmation}
+                  onChange={(e) => setPasswordConfirmation(e.target.value)}
+                  placeholder="******"
+                  className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+                />
+                {errors.passwordConfirmation && (
+                  <span className="text-red-500 text-sm">
+                    {errors.passwordConfirmation[0]}
+                  </span>
+                )}
+              </div>
+              <div className=" col-span-12">
+                <NavigationLine
+                  path="/"
+                  text1="Already have an account?"
+                  text2="Login here"
+                />
+              </div>
+              <div className="col-span-12 sm:flex sm:items-center sm:gap-4">
+                <Button
+                  className=" bg-[#6b4226] border-[#6b4226] transition-colors px-6 py-6 hover:bg-[#4d2e1b]"
+                  type="submit"
+                  disabled={loading}
+                >
+                  Create an account
+                </Button>
+              </div>
+
+              <Toaster />
+            </form>
+          </div>
+        </main>
       </div>
-    </div>
+    </section>
   );
 };
 
