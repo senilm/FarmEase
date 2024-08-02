@@ -5,16 +5,17 @@ import Expense from "./pages/Expense";
 import Home from "./pages/Home";
 import { ProtectedRouteProps } from "./lib/interfaces";
 import Dashboard from "./pages/Dashboard";
+import Register from "./pages/Register";
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const isAuth = sessionStorage.getItem("token") ? true : false;
   return isAuth ? children : <Navigate to="/" />;
 };
 
-const AdminRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const isAdmin = sessionStorage.getItem('type') == "ADMIN";
-  return isAdmin ? children : <Navigate to="/home" />;
-};
+// const AdminRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+//   const isAdmin = sessionStorage.getItem('type') == "ADMIN";
+//   return isAdmin ? children : <Navigate to="/home" />;
+// };
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/home"
           element={
@@ -50,9 +52,9 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <AdminRoute>
+              {/* <AdminRoute> */}
               <Dashboard />
-              </AdminRoute>
+              {/* </AdminRoute> */}
             </ProtectedRoute>
           }
         />
