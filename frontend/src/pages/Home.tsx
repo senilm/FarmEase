@@ -7,6 +7,16 @@ import Navbar from "../components/Navbar";
 import BookingSection from "../components/BookingSection";
 import ExpenseSection from "../components/ExpenseSection";
 import { Link } from "react-router-dom";
+import useUserStore, { Farm } from "../store/store";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectLabel,
+  SelectGroup,
+} from "../components/ui/select";
 
 const localizer = momentLocalizer(moment);
 
@@ -15,17 +25,22 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const isAdmin = sessionStorage.getItem('type') == "ADMIN"
+  const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
+  const { farms } = useUserStore();
+  const [currentStat, setCurrentStat] = useState("ADMIN");
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/booking/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${sessionStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/booking/all/${selectedFarm?.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
 
       const res = await response.json();
 
@@ -47,13 +62,16 @@ const Home = () => {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/expense`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${sessionStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/expense/farm/${selectedFarm?.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          },
+        }
+      );
 
       const res = await response.json();
 
@@ -67,29 +85,73 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchBookings();
-    fetchExpenses();
-  }, []);
+    if (selectedFarm) {
+      setCurrentStat(selectedFarm.role);
+      fetchBookings();
+      fetchExpenses();
+    }
+  }, [selectedFarm]);
 
   return (
     <section className=" w-full min-h-screen ">
       <Navbar />
+
+      {/* Farm select */}
+      <div className=" flex max-sm:px-5 px-10 mt-5 max-sm:mt-3 justify-end">
+        <div>
+          <Select
+            value={selectedFarm?.id || ""}
+            onValueChange={(value) => {
+              const farm = farms.find((f) => f.id === value);
+              if (farm) {
+                setSelectedFarm(farm);
+              }
+            }}
+          >
+            <SelectTrigger className="md:w-56 max-md:w-44">
+              <SelectValue placeholder="Select a farm" />
+            </SelectTrigger>
+            <SelectContent>
+              {farms.length > 0 ? (
+                farms.map((farm, i) => {
+                  return (
+                    <SelectItem value={farm.id} key={i}>
+                      {farm.name}
+                    </SelectItem>
+                  );
+                })
+              ) : (
+                <SelectGroup>
+                  <SelectLabel>No Farms</SelectLabel>
+                </SelectGroup>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {/* calender */}
-      <div className=" max-sm:mt-3 px-5">
+      <div className=" px-5 relative">
         <div className="max-sm:min-h-[50vh] min-h-[85vh]">
-          <div className="px-5 py-5 max-sm:px-0">
-            <div className=" py-2" style={{ height: '500px', overflowY: 'auto' }}>
-              {loading ? (
-                <div className=" text-center">Loading</div>
+          <div className="px-5 pb-5 max-sm:px-0 max-sm:pt-5">
+            <div
+              className=" py-2"
+              style={{ height: "500px", overflowY: "auto" }}
+            >
+              {!selectedFarm ? (
+                <div className="text-center text-2xl text-red-950 opacity-70">
+                  Please select a farm to continue...
+                </div>
+              ) : loading ? (
+                <div className=" text-center">Loading..</div>
               ) : (
                 <Calendar
                   localizer={localizer}
                   events={events}
                   startAccessor="start"
                   endAccessor="end"
-                  style={{ height: '100%', minWidth: '100%' }}
+                  style={{ height: "100%", minWidth: "100%" }}
                   views={["month"]}
-                  
                 />
               )}
             </div>
@@ -98,34 +160,38 @@ const Home = () => {
       </div>
 
       {/* Bookings */}
-      {isAdmin ? 
-      <div className="pt-5 max-sm:mt-0 mt-5 bg-slate-50 pb-5">
-        <div className=" text-center font-bold text-3xl mb-5">Bookings</div>
-        <BookingSection bookings={bookings} refetch={fetchBookings} />
-        <div className=" px-10">
-          {bookings.length == 6 ? (
-            <Link to={"/booking"} className="flex justify-end col-span-3">
-              <p className="  underline underline-offset-2">See more</p>
-            </Link>
-          ) : null}
+      {currentStat == "ADMIN" ? (
+        <div className="pt-5 max-sm:mt-0 mt-5 bg-slate-50 pb-5">
+          <div className=" text-center font-bold text-3xl mb-5">Bookings</div>
+          <BookingSection bookings={bookings} refetch={fetchBookings} />
+          <div className=" px-10">
+            {bookings.length == 6 ? (
+              <Link to={"/booking"} className="flex justify-end col-span-3">
+                <p className="  underline underline-offset-2">See more</p>
+              </Link>
+            ) : null}
+          </div>
         </div>
-      </div>
-      :null}
+      ) : null}
 
       {/* Expense */}
-      {isAdmin ? 
-      <div className="pt-5 bg-red-50 pb-10">
-        <div className=" text-center font-bold text-3xl mb-5">Expenses</div>
-        <ExpenseSection expenses={expenses} refetch={fetchExpenses} />
-        <div className="px-10">
-          {expenses.length == 6 ? (
-            <Link to={"/expense"} className="flex justify-end col-span-3 mt-[-1rem]">
-              <p className="  underline underline-offset-2">See more</p>
-            </Link>
-          ) : null}
+      {currentStat == "ADMIN" ? (
+        <div className="pt-5 bg-red-50 pb-8">
+          <div className=" text-center font-bold text-3xl mb-5">Expenses</div>
+          <ExpenseSection expenses={expenses} refetch={fetchExpenses} />
+          <div className="px-10">
+            {expenses.length == 6 ? (
+              <Link
+                to={"/expense"}
+                className="flex justify-end col-span-3 mt-[-1rem]"
+              >
+                <p className="  underline underline-offset-2">See more</p>
+              </Link>
+            ) : null}
+          </div>
         </div>
-      </div>
-        :null}
+      ) : null}
+      
     </section>
   );
 };

@@ -13,12 +13,12 @@ import {
   Booking as BookingI,
   FormErrors,
   filterDateInitialState,
-  optionType,
 } from "../lib/interfaces";
 import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import Navbar from "../components/Navbar";
 import BookingSection from "../components/BookingSection";
+import useUserStore, { Farm } from "../store/store";
 
 const schema = z.object({
   amount: z.string().min(1, { message: "Amount should be greater than 0" }),
@@ -28,17 +28,15 @@ const schema = z.object({
   toDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Select to date",
   }),
-  person: z.string().min(1, { message: "Please select a user" }),
+  farm: z.string().min(1, { message: "Please select a farm" }),
 });
 
 const Booking = () => {
   const [amount, setAmount] = useState<string>("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [person, setPerson] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [apiError, setApiError] = useState("");
-  const [options, setOptions] = useState<optionType[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const [bookings, setBookings] = useState<BookingI[]>([]);
@@ -46,9 +44,13 @@ const Booking = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [type, setType] = useState("self");
-  const isAdmin = sessionStorage.getItem("type") == "ADMIN";
   const [dateFilter, setDateFilter] = useState(filterDateInitialState);
+  const [selectedFarm, setSelectedFarm] = useState("");
+  const { farms } = useUserStore();
 
+  const [filFarm, setFilFarm] = useState<Farm | null>(null);
+  const [currentStat, setCurrentStat] = useState("ADMIN");
+ 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDateFilter({ ...dateFilter, [e.target.name]: e.target.value });
     setPage(1);
@@ -69,11 +71,10 @@ const Booking = () => {
         amount,
         fromDate,
         toDate,
-        person,
+        farm: selectedFarm,
       });
       if (parseResponse.error) {
         setErrors(parseResponse.error.formErrors.fieldErrors);
-        console.log(parseResponse.error.formErrors.fieldErrors);
         return;
       }
       setErrors({});
@@ -87,7 +88,7 @@ const Booking = () => {
           amount: parseInt(amount, 10),
           fromDate: new Date(fromDate),
           toDate: new Date(toDate),
-          userId: person,
+          farmId: selectedFarm,
         }),
       });
       const res = await response.json();
@@ -106,34 +107,15 @@ const Booking = () => {
         description: res?.message,
       });
       setPage(1);
-      fetchBookings();
+      if(filFarm)fetchBookings();
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
-      setPerson("");
+      setSelectedFarm("");
       setToDate("");
       setAmount("");
       setFromDate("");
-    }
-  };
-
-  const getUsers = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/users`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${sessionStorage.getItem("token")}`,
-        },
-      });
-      const response = await res.json();
-      if (!res.ok) {
-        console.log(response.message);
-      }
-      setOptions(response.users);
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -142,7 +124,7 @@ const Booking = () => {
       const response = await fetch(
         `${
           import.meta.env.VITE_BASE_URL
-        }/booking?page=${page}&type=${type}&fromDate=${
+        }/booking/farm/${filFarm?.id}?page=${page}&type=${type}&fromDate=${
           dateFilter.fromFilterDate
         }&toDate=${dateFilter.toFilterDate}`,
         {
@@ -163,7 +145,7 @@ const Booking = () => {
       if (page === 1) {
         setBookings(res?.bookings);
       } else {
-        setBookings((prevBookings) => [...prevBookings, ...res?.bookings]);
+        setBookings((prevBookings) => [...prevBookings, ...res.bookings]);
       }
 
       setHasMore(res?.bookings.length === 6);
@@ -180,12 +162,12 @@ const Booking = () => {
   };
 
   useEffect(() => {
-    getUsers();
-  }, []);
-
-  useEffect(() => {
-    fetchBookings();
-  }, [type, dateFilter]);
+    if (filFarm) {
+      setCurrentStat(filFarm.role)
+      setPage(1)
+      fetchBookings();
+    }
+  }, [type, dateFilter, filFarm]);
 
   return (
     <div>
@@ -198,6 +180,7 @@ const Booking = () => {
               <p className=" text-red-500 mt-2">{apiError}</p>
             </div>
             <form className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-5">
+
               {/* from */}
               <div className="grid gap-2">
                 <label
@@ -243,17 +226,17 @@ const Booking = () => {
                 )}
               </div>
 
-              {/* person */}
+              {/* farm */}
               <div className="grid gap-2">
                 <label
                   htmlFor="guest-name"
                   className="text-sm font-medium text-[#333]"
                 >
-                  Name
+                  Farm
                 </label>
                 <Select
-                  value={person}
-                  onValueChange={(value) => setPerson(value)}
+                  value={selectedFarm}
+                  onValueChange={(value) => setSelectedFarm(value)}
                 >
                   <SelectTrigger
                     id="guest-name"
@@ -262,7 +245,7 @@ const Booking = () => {
                     <SelectValue placeholder="Select a name" />
                   </SelectTrigger>
                   <SelectContent>
-                    {options.map((option) => {
+                    {farms?.map((option) => {
                       return (
                         <SelectItem value={option.id} key={option.id}>
                           {option.name}
@@ -271,9 +254,9 @@ const Booking = () => {
                     })}
                   </SelectContent>
                 </Select>
-                {errors.person && (
+                {errors.farm && (
                   <span className="text-red-500 text-sm mt-[-0.4rem]">
-                    {errors.person[0]}
+                    {errors.farm[0]}
                   </span>
                 )}
               </div>
@@ -332,7 +315,7 @@ const Booking = () => {
             >
               My Bookings
             </Button>
-            {isAdmin ? (
+            {currentStat == "ADMIN" ? (
               <Button
                 onClick={() => {
                   setType("all");
@@ -346,8 +329,37 @@ const Booking = () => {
             ) : null}
           </div>
           <div className=" flex gap-3 flex-wrap">
+
+            <div className=" flex items-center gap-2 text-lg max-sm:gap-[0.8rem] md:w-44 max-sm:w-[12.7rem]">
+             <p className=" text-sm">Farm</p>
+              <Select
+                value={filFarm?.id || ""}
+                onValueChange={(value) => {
+                  const farm = farms.find((f) => f.id === value);
+                  if (farm) {
+                    setFilFarm(farm);
+                  }
+                }}
+              >
+                <SelectTrigger
+                  id="guest-name"
+                  className="bg-white border-[#ccc] rounded-md px-4 py-2 text-[#333] focus:border-[#666] focus:ring-0"
+                >
+                  <SelectValue placeholder="Select a farm" />
+                </SelectTrigger>
+                <SelectContent>
+                  {farms?.map((option) => {
+                    return (
+                      <SelectItem value={option.id} key={option.id}>
+                        {option.name}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
             <div className=" flex items-center gap-2 text-lg">
-              <p className=" text-[#6b4226]">From: </p>
+              <p className="text-sm">From: </p>
               <input
                 type="date"
                 className="p-1 rounded-lg border"
@@ -356,8 +368,8 @@ const Booking = () => {
                 onChange={handleDateChange}
               />
             </div>
-            <div className=" flex items-center gap-2 text-lg max-sm:gap-[1.9rem]">
-              <p className=" text-[#6b4226]">To: </p>
+            <div className=" flex items-center gap-2 text-lg max-sm:gap-[1.7rem]">
+              <p className="text-sm">To: </p>
               <input
                 type="date"
                 className="p-1  rounded-lg border"
@@ -366,10 +378,11 @@ const Booking = () => {
                 onChange={handleDateChange}
               />
             </div>
+
           </div>
         </div>
         <BookingSection bookings={bookings} refetch={fetchBookings} />
-        {hasMore && (
+        {hasMore && filFarm && (
           <div className="flex justify-center mt-6">
             <Button
               className="bg-[#6b4226] text-white rounded-md px-6 py-2 hover:bg-[#4d2e1b]"

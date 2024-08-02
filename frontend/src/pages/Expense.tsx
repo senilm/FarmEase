@@ -11,10 +11,19 @@ import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import Navbar from "../components/Navbar";
 import ExpenseSection from "../components/ExpenseSection";
+import useUserStore from "../store/store";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../components/ui/select";
 
 const schema = z.object({
   amount: z.string().min(1, { message: "Amount should be greater than 0" }),
   note: z.string().min(1, { message: "Please provide some description" }),
+  farm: z.string().min(1, { message: "Please select a farm" }),
   expDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Select date",
   }),
@@ -35,6 +44,9 @@ const Expense = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [dateFilter, setDateFilter] = useState(filterDateInitialState);
+  const [farmId, setFarmId] = useState("");
+  const [filFarmId, setfilFarmId] = useState("");
+  const { farms } = useUserStore();
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDateFilter({ ...dateFilter, [e.target.name]: e.target.value });
@@ -55,6 +67,7 @@ const Expense = () => {
       const parseResponse = schema.safeParse({
         amount,
         note,
+        farm: farmId,
         expDate,
       });
 
@@ -73,6 +86,7 @@ const Expense = () => {
           amount: parseInt(amount, 10),
           note,
           date: new Date(expDate),
+          farmId,
         }),
       });
       const res = await response.json();
@@ -91,13 +105,14 @@ const Expense = () => {
         description: res?.message,
       });
       setPage(1);
-      fetchExpenses();
+      if (filFarmId) fetchExpenses();
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
       setAmount("");
       setNote("");
+      setFarmId("");
       setExpDate(new Date().toISOString().split("T")[0]);
     }
   };
@@ -105,7 +120,9 @@ const Expense = () => {
   const fetchExpenses = async (page = 1) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/expense?page=${page}&fromDate=${
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/expense/farm/${filFarmId}?page=${page}&fromDate=${
           dateFilter.fromFilterDate
         }&toDate=${dateFilter.toFilterDate}`,
         {
@@ -126,7 +143,7 @@ const Expense = () => {
       if (page == 1) {
         setExpenses(res?.expenses);
       } else {
-        setExpenses((prevExpenses) => [...prevExpenses, ...res?.expenses]);
+        setExpenses((prevExpenses) => [...prevExpenses, ...res.expenses]);
       }
       setHasMore(res?.expenses.length === 6);
     } catch (error) {
@@ -142,13 +159,14 @@ const Expense = () => {
   };
 
   useEffect(() => {
-    fetchExpenses();
-  }, [dateFilter]);
+    if (filFarmId) {
+      fetchExpenses();
+    }
+  }, [dateFilter, filFarmId]);
 
   return (
     <div>
       <Navbar />
-
       <div className="md:max-w-3xl mx-auto px-4 pt-4 max-sm:px-7 sm:px-6 lg:px-8">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-[#f5f5f5] px-6 py-8 sm:px-10 sm:py-12">
@@ -199,6 +217,42 @@ const Expense = () => {
                 )}
               </div>
 
+              {/* farm */}
+              <div className="grid gap-2">
+                <label
+                  htmlFor="guest-name"
+                  className="text-sm font-medium text-[#333]"
+                >
+                  Farm
+                </label>
+                <Select
+                  value={farmId}
+                  onValueChange={(value) => setFarmId(value)}
+                >
+                  <SelectTrigger
+                    id="guest-name"
+                    className="bg-white border-[#ccc] rounded-md px-4 py-2 text-[#333] focus:border-[#666] focus:ring-0"
+                  >
+                    <SelectValue placeholder="Select a farm" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {farms?.map((option) => {
+                      return (
+                        <SelectItem value={option.id} key={option.id}>
+                          {option.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {errors.farm && (
+                  <span className="text-red-500 text-sm mt-[-0.4rem]">
+                    {errors.farm[0]}
+                  </span>
+                )}
+              </div>
+
+              {/* date */}
               <div className="grid gap-2 ">
                 <label
                   htmlFor="check-in"
@@ -240,8 +294,31 @@ const Expense = () => {
       <div className="pt-5 mt-5 pb-5 bg-red-50">
         <div className=" text-center font-bold text-3xl mb-5">Expenses</div>
         <div className="px-10 flex items-center gap-5 flex-wrap">
+          <div className=" flex items-center gap-2 text-lg max-sm:gap-[0.8rem] md:w-44 max-sm:w-[12.7rem]">
+            <p className=" text-sm">Farm</p>
+            <Select
+              value={filFarmId}
+              onValueChange={(value) => setfilFarmId(value)}
+            >
+              <SelectTrigger
+                id="guest-name"
+                className="bg-white border-[#ccc] rounded-md px-4 py-2 text-[#333] focus:border-[#666] focus:ring-0"
+              >
+                <SelectValue placeholder="Select a farm" />
+              </SelectTrigger>
+              <SelectContent>
+                {farms?.map((option) => {
+                  return (
+                    <SelectItem value={option.id} key={option.id}>
+                      {option.name}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
           <div className=" flex items-center gap-2 text-lg">
-            <p className=" text-[#6b4226]">From: </p>
+            <p className="text-sm">From: </p>
             <input
               type="date"
               className="p-1 rounded-lg border"
@@ -250,11 +327,11 @@ const Expense = () => {
               onChange={handleDateChange}
             />
           </div>
-          <div className=" flex items-center gap-2 text-lg max-sm:gap-[1.9rem]">
-            <p className=" text-[#6b4226]">To: </p>
+          <div className=" flex items-center gap-2 text-lg max-sm:gap-[1.6rem]">
+            <p className="text-sm ">To: </p>
             <input
               type="date"
-              className="p-1  rounded-lg border"
+              className="p-1 rounded-lg border"
               name="toFilterDate"
               value={dateFilter.toFilterDate}
               onChange={handleDateChange}
@@ -262,7 +339,7 @@ const Expense = () => {
           </div>
         </div>
         <ExpenseSection expenses={expenses} refetch={fetchExpenses} />
-        {hasMore && (
+        {hasMore && filFarmId && (
           <div className="flex justify-center mt-6">
             <Button
               className="bg-[#6b4226] text-white rounded-md px-6 py-2 hover:bg-[#4d2e1b]"
