@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import NavigationLine from "../components/NavigationLine";
+import { Loader2 } from "lucide-react";
 
 const schema = z
   .object({
@@ -212,16 +213,19 @@ const Register = () => {
                   text2="Login here"
                 />
               </div>
-              <div className="col-span-12 sm:flex sm:items-center sm:gap-4">
+              <div className="col-span-12 sm:flex sm:items-center sm:gap-4 text-right">
                 <Button
-                  className=" bg-[#6b4226] border-[#6b4226] transition-colors px-6 py-6 hover:bg-[#4d2e1b]"
+                  className=" bg-[#6b4226] border-[#6b4226] transition-colors md:px-6 md:py-6 hover:bg-[#4d2e1b]"
                   type="submit"
                   disabled={loading}
                 >
-                  Create an account
+                  {loading ? (
+                    <Loader2 className=" h-4 w-4 animate-spin" />
+                  ) : (
+                    "Create an account"
+                  )}
                 </Button>
               </div>
-
               <Toaster />
             </form>
           </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { loginFormError } from "../lib/interfaces";
 import { useNavigate } from "react-router-dom";
@@ -205,7 +205,7 @@ const Login = () => {
                   type="submit"
                   disabled={loading}
                 >
-                  Login
+                  {loading ? <Loader2 className=" h-4 w-4 animate-spin" /> : "Login"}
                 </Button>
               </div>
 
