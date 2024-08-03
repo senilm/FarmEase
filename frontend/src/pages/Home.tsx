@@ -17,6 +17,7 @@ import {
   SelectLabel,
   SelectGroup,
 } from "../components/ui/select";
+import Loader from "../components/Loader";
 
 const localizer = momentLocalizer(moment);
 
@@ -143,7 +144,7 @@ const Home = () => {
                   Please select a farm to continue...
                 </div>
               ) : loading ? (
-                <div className=" text-center">Loading..</div>
+                <div className="flex justify-center text-red-950 opacity-70"><Loader className=" w-14 h-14"/></div>
               ) : (
                 <Calendar
                   localizer={localizer}

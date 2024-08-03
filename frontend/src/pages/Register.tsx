@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Toaster } from "../components/ui/toaster";
 import { useToast } from "../components/ui/use-toast";
 import NavigationLine from "../components/NavigationLine";
-import { Loader2 } from "lucide-react";
+import Loader from "../components/Loader";
 
 const schema = z
   .object({
@@ -220,7 +220,7 @@ const Register = () => {
                   disabled={loading}
                 >
                   {loading ? (
-                    <Loader2 className=" h-4 w-4 animate-spin" />
+                    <Loader className=" h-4 w-4 " />
                   ) : (
                     "Create an account"
                   )}

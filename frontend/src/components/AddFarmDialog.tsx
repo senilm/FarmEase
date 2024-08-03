@@ -16,6 +16,7 @@ import { addFarmErrorI } from "../lib/interfaces"
 import { useToast } from "./ui/use-toast"
 import { Textarea } from "./ui/textarea"
 import useUserStore from "../store/store"
+import Loader from "./Loader"
 
 const schema = z.object({
     name: z.string().min(1, { message: "Please provide name" }),
@@ -134,7 +135,7 @@ const AddFarmDialog = () => {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-[#6b4226] hover:bg-[#4d2e1b]">{loading ? "..." : "Submit"}</Button>
+          <Button onClick={handleSubmit} disabled={loading} className="bg-[#6b4226] hover:bg-[#4d2e1b]">{loading ? <Loader className="w-4 h-4"/> : "Submit"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

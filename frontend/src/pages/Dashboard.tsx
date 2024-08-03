@@ -29,6 +29,7 @@ import AddUserDialog from "../components/AddUserDialog";
 import { Toaster } from "../components/ui/toaster";
 import UserCard from "../components/UserCard";
 import Overlay from "../components/Overlay";
+import Loader from "../components/Loader";
 
 const Dashboard = () => {
   const [dateFilter, setDateFilter] = useState(filterDateInitialState);
@@ -263,7 +264,7 @@ const Dashboard = () => {
                 </div>
                 <div className=" flex flex-col gap-3 pb-3 pt-2 md:px-10 px-5">
                   {loadingUser ? (
-                    <div className=" text-center">Loading users...</div>
+                    <div className=" flex justify-center text-red-950 opacity-70"><Loader className=" w-7 h-7"/></div>
                   ) : users?.length == 0 ? (
                     <div className=" text-center">
                       {!selectedFarm ? (
@@ -336,7 +337,7 @@ const Dashboard = () => {
                   </div>
                   <div className=" flex flex-col gap-3 pb-3 pt-2">
                     {loadingMore ? (
-                      <div className=" text-center">Loading...</div>
+                      <div className="flex justify-center text-red-950 opacity-70"><Loader className=" h-7 w-7"/></div>
                     ) : transactions.length == 0 ? (
                       <div className=" text-center">
                         {!dateFilter.fromFilterDate ||

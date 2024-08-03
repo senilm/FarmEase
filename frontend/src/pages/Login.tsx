@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { z } from "zod";
 import { loginFormError } from "../lib/interfaces";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../store/store";
 import { Toaster } from "../components/ui/toaster";
 import NavigationLine from "../components/NavigationLine";
+import Loader from "../components/Loader";
+
 const schema = z.object({
   person: z.string().min(1, { message: "Please enter email" }),
   password: z.string().min(1, { message: "Please select a password" }),
@@ -205,7 +207,7 @@ const Login = () => {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? <Loader2 className=" h-4 w-4 animate-spin" /> : "Login"}
+                  {loading ? <Loader className=" h-4 w-4" /> : "Login"}
                 </Button>
               </div>
 

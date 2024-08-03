@@ -22,6 +22,7 @@ import { options } from "../lib/constants";
 import SearchAndSelect from "./SearchAndSelect";
 import { z } from "zod"
 import { useToast } from "./ui/use-toast";
+import Loader from "./Loader";
 
 const schema = z.object({
   name: z.string().min(1, { message: "Please provide name" }),
@@ -149,7 +150,7 @@ const AddUserDialog:React.FC<AddUserDialogI> = ({farmId, fetchUsers}) => {
           </div>
         </div>
         <DialogFooter>
-          <Button disabled={loading} onClick={handleSubmit} className="bg-[#6b4226] hover:bg-[#4d2e1b]">{loading ? "..." : "Add user"}</Button>
+          <Button disabled={loading} onClick={handleSubmit} className="bg-[#6b4226] hover:bg-[#4d2e1b]">{loading ? <Loader className=" w-4 h-4"/> : "Add user"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

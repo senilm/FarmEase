@@ -19,6 +19,7 @@ import {
   SelectContent,
   SelectItem,
 } from "../components/ui/select";
+import Loader from "../components/Loader";
 
 const schema = z.object({
   amount: z.string().min(1, { message: "Amount should be greater than 0" }),
@@ -285,7 +286,7 @@ const Expense = () => {
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "..." : "Add"}
+              {loading ? <Loader className=" w-5 h-5"/> : "Add"}
             </Button>
           </div>
         </div>

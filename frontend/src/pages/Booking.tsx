@@ -19,6 +19,7 @@ import { useToast } from "../components/ui/use-toast";
 import Navbar from "../components/Navbar";
 import BookingSection from "../components/BookingSection";
 import useUserStore, { Farm } from "../store/store";
+import Loader from "../components/Loader";
 
 const schema = z.object({
   amount: z.string().min(1, { message: "Amount should be greater than 0" }),
@@ -293,7 +294,7 @@ const Booking = () => {
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "..." : "Book Now"}
+              {loading ? <Loader className=" w-5 h-5"/> : "Book Now"}
             </Button>
           </div>
         </div>
