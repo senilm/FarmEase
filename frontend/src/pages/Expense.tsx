@@ -339,7 +339,7 @@ const Expense = () => {
             />
           </div>
         </div>
-        <ExpenseSection expenses={expenses} refetch={fetchExpenses} />
+        <ExpenseSection expenses={expenses} refetch={fetchExpenses} loading={false}/>
         {hasMore && filFarmId && (
           <div className="flex justify-center mt-6">
             <Button

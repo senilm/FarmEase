@@ -382,7 +382,7 @@ const Booking = () => {
 
           </div>
         </div>
-        <BookingSection bookings={bookings} refetch={fetchBookings} />
+        <BookingSection bookings={bookings} refetch={fetchBookings} loading={false}/>
         {hasMore && filFarm && (
           <div className="flex justify-center mt-6">
             <Button

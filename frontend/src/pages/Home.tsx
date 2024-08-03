@@ -23,7 +23,8 @@ const localizer = momentLocalizer(moment);
 
 const Home = () => {
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingB, setLoadingB] = useState(false);
+  const [loadingE, setLoadingE] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
@@ -31,6 +32,7 @@ const Home = () => {
   const [currentStat, setCurrentStat] = useState("ADMIN");
 
   const fetchBookings = async () => {
+    setLoadingB(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/booking/all/${selectedFarm?.id}`,
@@ -55,13 +57,15 @@ const Home = () => {
         end: new Date(booking?.toDate),
       }));
       setEvents(bookings);
-      setLoading(false);
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoadingB(false);
     }
   };
 
   const fetchExpenses = async () => {
+    setLoadingE(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/expense/farm/${selectedFarm?.id}`,
@@ -82,6 +86,8 @@ const Home = () => {
       setExpenses(res?.expenses.slice(0, 6));
     } catch (error) {
       console.log(error);
+    } finally{
+      setLoadingE(false);
     }
   };
 
@@ -143,7 +149,7 @@ const Home = () => {
                 <div className="text-center text-2xl text-red-950 opacity-70">
                   Please select a farm to continue...
                 </div>
-              ) : loading ? (
+              ) : loadingB ? (
                 <div className="flex justify-center text-red-950 opacity-70"><Loader className=" w-14 h-14"/></div>
               ) : (
                 <Calendar
@@ -164,7 +170,7 @@ const Home = () => {
       {currentStat == "ADMIN" ? (
         <div className="pt-5 max-sm:mt-0 mt-5 bg-slate-50 pb-5">
           <div className=" text-center font-bold text-3xl mb-5">Bookings</div>
-          <BookingSection bookings={bookings} refetch={fetchBookings} />
+          <BookingSection bookings={bookings} refetch={fetchBookings} loading={loadingB} />
           <div className=" px-10">
             {bookings.length == 6 ? (
               <Link to={"/booking"} className="flex justify-end col-span-3">
@@ -179,7 +185,7 @@ const Home = () => {
       {currentStat == "ADMIN" ? (
         <div className="pt-5 bg-red-50 pb-8">
           <div className=" text-center font-bold text-3xl mb-5">Expenses</div>
-          <ExpenseSection expenses={expenses} refetch={fetchExpenses} />
+          <ExpenseSection expenses={expenses} refetch={fetchExpenses}  loading={loadingE}/>
           <div className="px-10">
             {expenses.length == 6 ? (
               <Link
