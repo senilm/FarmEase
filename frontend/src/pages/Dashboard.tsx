@@ -208,10 +208,10 @@ const Dashboard = () => {
       <Navbar />
       <div className="md:px-5 px-5 mt-2">
         <div className=" flex justify-end gap-5 items-center">
-          <p className=" max-sm:text-xs">
+          <p className=" max-sm:text-xs flex items-center gap-2 max-sm:flex-col max-sm:items-start max-sm:gap-0">
             Hey,{" "}
-            <span className=" font-serif md:text-xl max-md:text-lg">
-              {userName}
+            <span className=" font-serif md:text-xl max-md:text-lg max-w-[7ch] overflow-hidden whitespace-nowrap text-ellipsis inline-block">
+              {userName} 
             </span>
           </p>
           <AddFarmDialog />
