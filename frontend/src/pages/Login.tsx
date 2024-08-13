@@ -181,16 +181,16 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     type={showPassword ? "text" : "password"}
-                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm"
+                    className="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm pr-8"
                   />
                   <span
-                    className="absolute top-1 right-0 mt-2 mr-2 cursor-pointer"
+                    className="absolute top-1 right-0 mt-2 mr-2 cursor-pointer z-10"
                     onClick={togglePasswordVisibility}
                   >
                     {showPassword ? (
-                      <EyeOffIcon className="w-5 h-4" />
+                      <EyeOffIcon className="w-5 h-4 " />
                     ) : (
-                      <EyeIcon className="w-5 h-4" />
+                      <EyeIcon className="w-5 h-4 " />
                     )}
                   </span>
                   {errors.password && (
