@@ -27,8 +27,8 @@ const Home = () => {
   const [loadingE, setLoadingE] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const { farms } = useUserStore();
+  const [selectedFarm, setSelectedFarm] = useState<Farm | null>(farms.length > 0 ? farms[0] : null);
   const [currentStat, setCurrentStat] = useState("ADMIN");
 
   const fetchBookings = async () => {
@@ -140,10 +140,10 @@ const Home = () => {
       {/* calender */}
       <div className=" px-5 relative">
         <div className="max-sm:min-h-[50vh] min-h-[85vh]">
-          <div className="px-5 pb-5 max-sm:px-0 max-sm:pt-5">
+          <div className="px-5 pb-5 max-sm:px-0 max-sm:pt-5 min-h-full">
             <div
               className=" py-2"
-              style={{ height: "500px", overflowY: "auto" }}
+              style={{ height: "80vh", overflowY: "auto" }}
             >
               {!selectedFarm ? (
                 <div className="text-center text-2xl text-red-950 opacity-70">
