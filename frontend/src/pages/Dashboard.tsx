@@ -40,8 +40,8 @@ const Dashboard = () => {
   const [balance, setBalance] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadingUser, setLoadingUser] = useState(false);
-  const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const { farms, userName } = useUserStore();
+  const [selectedFarm, setSelectedFarm] = useState<Farm | null>( farms.length > 0 ? farms[0] : null);
   const [currentStat, setCurrentStat] = useState("ADMIN");
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
