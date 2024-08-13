@@ -215,7 +215,7 @@ const Register = () => {
               </div>
               <div className="col-span-12 sm:flex sm:items-center sm:gap-4 text-right">
                 <Button
-                  className=" bg-[#6b4226] border-[#6b4226] transition-colors md:px-6 md:py-6 hover:bg-[#4d2e1b]"
+                  className=" bg-[#6b4226] border-[#6b4226] transition-colors md:px-3 md:py-3 hover:bg-[#4d2e1b]"
                   type="submit"
                   disabled={loading}
                 >
